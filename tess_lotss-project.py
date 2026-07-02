@@ -12,7 +12,7 @@ from astropy.time import Time
 import lightkurve as lk
 
 # %% Cell 1: load the Gaia/LoTSS catalog ------------------------------------
-env1 = "C:/Users/ADMIN/Downloads/gaia_info_100pc_lc_info_lotss.csv"  # FIX: removed trailing "/" - this is a file, not a folder
+env1 = "C:/Users/ADMIN/Downloads/gaia_info_100pc_lc_info_lotss.csv"  
 tab = Table.read(env1)
 ids = tab["ID"]
 
@@ -50,6 +50,9 @@ with fits.open(fn_fits) as hdul:          # FIX: use a context manager so the fi
 
 
 # %% Cell 5: the DynamicSpectrum class ---------------------------------------
+# any time you update the class, you need to re-initialize the class instance
+# class instance is when ds = DynamicSpectrum(fn)
+
 class DynamicSpectrum:
     """
     Wraps a LOFAR-style dynamic-spectrum FITS cube of shape
@@ -182,11 +185,10 @@ class DynamicSpectrum:
 
     def get_tess_lightcurve(self):
         name = None
-        for key in ("OBJECT", "SRC-NAME", "SOURCE", "TARGET"):
-            if key in self.hdr:
-                name = self.hdr[key]
-                break
-
+        try:
+           name = self.hdr['NAME']
+        except:
+            pass
         if name is None:
             print("No source-name keyword found in header; inspect self.hdr.")
             return None
@@ -211,5 +213,7 @@ if __name__ == "__main__":
     print(ds.get_statistics(stokes="i"))
 
     plt.show()
+    #%%
+    
     
     
