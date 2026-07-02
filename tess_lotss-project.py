@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 from astropy.time import Time
 import lightkurve as lk
+import pandas as pd
 
 # %% Cell 1: load the Gaia/LoTSS catalog ------------------------------------
 env1 = "C:/Users/ADMIN/Downloads/gaia_info_100pc_lc_info_lotss.csv"  
@@ -214,6 +215,19 @@ if __name__ == "__main__":
 
     plt.show()
     #%%
-    
-    
-    
+    class DynamicSpectrum:
+        def _init_(self,lightcurve_data=None):
+            """initialize the Dynamic Spectrum class.
+            parameters:
+
+            """
+            self.lightcurve_data = lightcurve_data
+            
+        def get_lightcurve_function(self):
+            """
+            Mock template function representing your existing method
+            Returns the lightcurve data structure or object.
+            """
+            
+            
+            
