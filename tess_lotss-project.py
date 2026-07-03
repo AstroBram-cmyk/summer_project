@@ -228,6 +228,18 @@ if __name__ == "__main__":
             Mock template function representing your existing method
             Returns the lightcurve data structure or object.
             """
-            
+            return self.lightcurve_data()
+        def get_tic_name(self) ->str:
+            lc = self.get_lightcurve_function()
+            if not lc:
+                raise valueError("No Lightcurve data found.")
+                #Access the TIC ID attribute from your specific light curve object structure.
+                try: 
+                    if hasattr(lc,"label") and lc.label:
+                        return str(lc.label)
+                    elif hasattr(lc, "meta") and "OBJECT" in lc.meta:
+                        return
+                    
+                    
             
             
