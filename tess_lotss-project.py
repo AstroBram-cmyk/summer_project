@@ -127,7 +127,11 @@ class DynamicSpectrum:
         minv = np.nanmin(sub)
         med = np.nanmedian(sub)
         return std, maxv, minv, med
-
+    def get_tic_name(self) ->str:
+        lc = self.get_tess_lightcurve()
+        name = lc[0].meta["TARGETID"]
+        self.tic_name = name
+        
     def plot_lightcurve(self, freq_idx=None, freq_range=None, stokes="i"):
         """
         Plot flux vs. time.
@@ -200,6 +204,7 @@ class DynamicSpectrum:
             return None
 
         lcs = search.download_all()
+        self.lcs = lcs
         return lcs
 
 
@@ -215,31 +220,6 @@ if __name__ == "__main__":
 
     plt.show()
     #%%
-    class DynamicSpectrum:
-        def _init_(self,lightcurve_data=None):
-            """initialize the Dynamic Spectrum class.
-            parameters:
 
-            """
-            self.lightcurve_data = lightcurve_data
-            
-        def get_lightcurve_function(self):
-            """
-            Mock template function representing your existing method
-            Returns the lightcurve data structure or object.
-            """
-            return self.lightcurve_data()
-        def get_tic_name(self) ->str:
-            lc = self.get_lightcurve_function()
-            if not lc:
-                raise valueError("No Lightcurve data found.")
-                #Access the TIC ID attribute from your specific light curve object structure.
-                try: 
-                    if hasattr(lc,"label") and lc.label:
-                        return str(lc.label)
-                    elif hasattr(lc, "meta") and "OBJECT" in lc.meta:
-                        return
-                    
-                    
             
             
