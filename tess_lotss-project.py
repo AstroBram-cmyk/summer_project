@@ -221,5 +221,30 @@ if __name__ == "__main__":
     plt.show()
     #%%
 
-            
-            
+def get_catalog_row(tic_value, table=tab):
+    """
+    Find a catalog row using a TIC ID.
+
+    Parameters
+    ----------
+    tic_value : int
+        TIC ID (e.g. 470085072)
+    table : astropy.table.Table
+        Catalog table.
+
+    Returns
+    -------
+    idx : int
+        Index of the matching row.
+    row : astropy.table.Row
+        Complete row containing all catalog information.
+    """
+    matches = np.where(table["ID"] == tic_value)[0]
+
+    if len(matches) == 0:
+        raise ValueError(f"TIC {tic_value} not found in the catalog.")
+
+    idx = matches[0]
+    row = table[idx]
+
+    return idx, row
