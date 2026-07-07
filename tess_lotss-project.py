@@ -1,4 +1,3 @@
-
 """
 @Astro Bramuel
 """
@@ -13,7 +12,7 @@ import lightkurve as lk
 import pandas as pd
 
 # %% Cell 1: load the Gaia/LoTSS catalog ------------------------------------
-env1 = "C:/Users/ADMIN/Downloads/gaia_info_100pc_lc_info_lotss.csv"  
+env1 = "C:/Users/ADMIN/Downloads/gaia_info_100pc_lc_info_lotss.csv"
 tab = Table.read(env1)
 ids = tab["ID"]
 
@@ -45,7 +44,7 @@ data_cat = np.load(fn_cat, allow_pickle=True)
 
 
 # %% Cell 4: quick look at the Stokes I plane --------------------------------
-with fits.open(fn_fits) as hdul:          # FIX: use a context manager so the file handle is closed properly
+with fits.open(fn_fits) as hdul:  # context manager closes the file handle properly
     data_fits = hdul[0]
     stokes_i = data_fits.data[0, :, :]
 
@@ -70,8 +69,11 @@ class DynamicSpectrum:
 
         self.start_time_isot = self.hdr["OBS-STAR"]
         self.end_time_isot = self.hdr["OBS-STOP"]
-        self.freq_max = self.hdr["FRQ-MAX"]
-        self.freq_min = self.hdr["FRQ-MIN"]
+
+        # FIX: header stores frequency in Hz -- convert to MHz so the axis
+        # values actually match the "MHz" label used in the plots below.
+        self.freq_max = self.hdr["FRQ-MAX"] / 1e6
+        self.freq_min = self.hdr["FRQ-MIN"] / 1e6
 
         self.start_time_mjd = Time(self.start_time_isot, format="isot").mjd
         self.end_time_mjd = Time(self.end_time_isot, format="isot").mjd
@@ -127,11 +129,12 @@ class DynamicSpectrum:
         minv = np.nanmin(sub)
         med = np.nanmedian(sub)
         return std, maxv, minv, med
-    def get_tic_name(self) ->str:
+
+    def get_tic_name(self) -> str:
         lc = self.get_tess_lightcurve()
         name = lc[0].meta["TARGETID"]
         self.tic_name = name
-        
+
     def plot_lightcurve(self, freq_idx=None, freq_range=None, stokes="i"):
         """
         Plot flux vs. time.
@@ -191,8 +194,8 @@ class DynamicSpectrum:
     def get_tess_lightcurve(self):
         name = None
         try:
-           name = self.hdr['NAME']
-        except:
+            name = self.hdr["NAME"]
+        except Exception:
             pass
         if name is None:
             print("No source-name keyword found in header; inspect self.hdr.")
@@ -207,6 +210,43 @@ class DynamicSpectrum:
         self.lcs = lcs
         return lcs
 
+    def dedisperse(self, a, alpha, stokes="i"):
+        """
+        Dedisperses the dynamic spectrum based on the equation:
+            delta_t = 1/(a * (alpha - 1)) * (nu^(1-alpha) - nu0^(1-alpha))
+
+        Shifts each frequency channel in time to remove frequency-dependent
+        dispersive delay, so a drifting feature becomes vertical (non-drifting).
+
+        :param a: drift-rate scale parameter
+        :type a: float
+        :param alpha: drift-rate power-law index
+        :type alpha: float
+        :param stokes: which Stokes parameter to dedisperse, defaults to "i"
+        :type stokes: str
+        :return: the de-dispersed dynamic spectrum
+        :rtype: 2-dimensional ndarray (freq x time)
+        """
+        data = self._get_stokes(stokes)            # 2D array: [freq, time]
+        freqs_flip = np.flip(self.freq_axis[:-1])   # already in MHz
+        ds = np.flip(data.copy(), axis=0)
+
+        # self.time_axis is in MJD (days) -- convert bin width to seconds
+        dt = (self.time_axis[1] - self.time_axis[0]) * 86400.0
+
+        exp = 1 - alpha
+        nu0 = freqs_flip[0]
+
+        for j, nu in enumerate(freqs_flip):
+            deltat = 1 / (a * (alpha - 1)) * (nu**exp - nu0**exp)
+            dn = int(deltat / dt)
+            ds[j] = np.roll(ds[j], -dn)
+            if dn != 0:
+                ds[j, -dn:] = 0
+
+        ds = np.flip(ds, axis=0)
+        return ds
+
 
 # %% Cell 6: example usage ----------------------------------------------------
 if __name__ == "__main__":
@@ -219,7 +259,9 @@ if __name__ == "__main__":
     print(ds.get_statistics(stokes="i"))
 
     plt.show()
-    #%%
+
+
+# %% Cell 7: catalog lookup ---------------------------------------------------
 def get_catalog_row(tic_value, table=tab):
     """
     Find a catalog row using a TIC ID.
@@ -264,8 +306,32 @@ def get_catalog_row(tic_value, table=tab):
     row_info = {col: row[col] for col in table.colnames}
 
     return idx, row, tic_name, row_info
-    #%% Cell 7: look up a specific TIC's full catalog row -----------------------
+
+
 idx, row, tic_name, row_info = get_catalog_row(470085072, table=tab)  # use a real TIC ID from your tab["ID"]
 print("index:", idx)
 print("tic_name:", tic_name)
 print("row_info:", row_info)
+
+
+# %% Cell 8: dedispersion demo ------------------------------------------------
+ds_obj = DynamicSpectrum(fn_fits)
+dedispersed_data = ds_obj.dedisperse(a=1.5, alpha=2.0, stokes="i")  # replace a/alpha with real fitted values
+
+# plot it manually, since dedisperse returns a raw array, not a figure
+fig, ax = plt.subplots()
+im = ax.imshow(
+    dedispersed_data,
+    aspect="auto",
+    origin="lower",
+    extent=[
+        ds_obj.time_axis[0],
+        ds_obj.time_axis[-1],
+        ds_obj.freq_axis[0],
+        ds_obj.freq_axis[-1],
+    ],
+)
+fig.colorbar(im, ax=ax, label="Stokes I (dedispersed)")
+ax.set_xlabel("Time (MJD)")
+ax.set_ylabel("Frequency (MHz)")
+plt.show()
