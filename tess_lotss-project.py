@@ -220,31 +220,47 @@ if __name__ == "__main__":
 
     plt.show()
     #%%
-
 def get_catalog_row(tic_value, table=tab):
     """
     Find a catalog row using a TIC ID.
 
     Parameters
     ----------
-    tic_value : int
-        TIC ID (e.g. 470085072)
+    tic_value : int or str
+        TIC ID, e.g. 470085072 or "TIC 470085072".
     table : astropy.table.Table
-        Catalog table.
+        Catalog table (must have an "ID" column).
 
     Returns
     -------
     idx : int
-        Index of the matching row.
+        Index of the matching row in the table.
     row : astropy.table.Row
         Complete row containing all catalog information.
+    tic_name : str
+        TIC name string, e.g. "TIC 470085072" (usable with lightkurve).
+    row_info : dict
+        Same row's data as a plain dict, {column_name: value}, for easy access.
     """
-    matches = np.where(table["ID"] == tic_value)[0]
+    # normalize input to a plain integer ID
+    if isinstance(tic_value, str):
+        tic_value = tic_value.upper().replace("TIC", "").strip()
+    tic_value = int(tic_value)
 
+    # build the TIC name string used by lightkurve / TESS lookups
+    tic_name = f"TIC {tic_value}"
+
+    # index the table for the matching row
+    matches = np.where(table["ID"] == tic_value)[0]
     if len(matches) == 0:
         raise ValueError(f"TIC {tic_value} not found in the catalog.")
+    if len(matches) > 1:
+        print(f"Warning: {len(matches)} rows match TIC {tic_value}, using the first.")
 
-    idx = matches[0]
+    idx = int(matches[0])
     row = table[idx]
 
-    return idx, row
+    # pull all columns into a plain dict too, for convenience
+    row_info = {col: row[col] for col in table.colnames}
+
+    return idx, row, tic_name, row_info
