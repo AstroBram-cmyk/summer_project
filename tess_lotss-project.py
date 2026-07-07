@@ -264,3 +264,8 @@ def get_catalog_row(tic_value, table=tab):
     row_info = {col: row[col] for col in table.colnames}
 
     return idx, row, tic_name, row_info
+    #%% Cell 7: look up a specific TIC's full catalog row -----------------------
+idx, row, tic_name, row_info = get_catalog_row(470085072, table=tab)  # use a real TIC ID from your tab["ID"]
+print("index:", idx)
+print("tic_name:", tic_name)
+print("row_info:", row_info)
