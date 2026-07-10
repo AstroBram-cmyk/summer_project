@@ -10,7 +10,7 @@ from astropy.io import fits
 from astropy.time import Time
 import lightkurve as lk
 import pandas as pd
-
+from warnings import warn
 # %% Cell 1: load the Gaia/LoTSS catalog ------------------------------------
 env1 = "C:/Users/ADMIN/Downloads/gaia_info_100pc_lc_info_lotss.csv"
 tab = Table.read(env1)
@@ -84,12 +84,13 @@ class DynamicSpectrum:
         self.time_axis = np.linspace(
             self.start_time_mjd, self.end_time_mjd, self.n_time
         )
+        self.time_resolution = (self.time_axis[1]-self.time_axis[0])*86400
 
-    def _get_stokes(self, stokes):
+    def _get_stokes(self, stokes): #get this specific polarization
         if isinstance(stokes, str):
             stokes_str = stokes.lower()
-            assert stokes_str in ["i", "q", "u", "v"], "stokes must be i/q/u/v"
-            stokes = {"i": 0, "q": 1, "u": 2, "v": 3}[stokes_str]
+            assert stokes_str in ["i", "q", "u", "v"], ("stokes must be i/q/u/v")
+            stokes = {"i": 0, "q": 1, "u": 2, "v": 3}[stokes_str] #numbers assigned to stokes in array
         data = self.data[stokes, :, :]
         return data
 
@@ -180,7 +181,7 @@ class DynamicSpectrum:
             i0, i1 = time_range
             spec = np.nanmean(data[:, i0:i1], axis=1)
             label = f"t = {self.time_axis[i0]:.5f}-{self.time_axis[i1 - 1]:.5f} MJD averaged"
-        else:
+        else: #why did i minus 1 here, not clear...
             spec = np.nanmean(data, axis=1)
             label = "full duration averaged"
 
@@ -335,3 +336,4 @@ fig.colorbar(im, ax=ax, label="Stokes I (dedispersed)")
 ax.set_xlabel("Time (MJD)")
 ax.set_ylabel("Frequency (MHz)")
 plt.show()
+
