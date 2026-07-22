@@ -101,6 +101,7 @@
     "MISSION": "TESS",
     "RA": 327.04775462228,
     "DEC": 79.217358307312,
+    "FILENAME": "C:\\Users\\ADMIN\\.lightkurve\\cache\\mastDownload\\TESS\\tess2024326142117-s0086-0000000470085072-0283-s\\tess2024326142117-s0086-0000000470085072-0283-s_lc.fits",
     "FLUX_ORIGIN": "pdcsap_flux",
     "AUTHOR": "SPOC",
     "TARGETID": 470085072,

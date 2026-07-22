@@ -11,6 +11,7 @@ from astropy.time import Time
 import lightkurve as lk
 import pandas as pd
 from warnings import warn
+
 # %% Cell 1: load the Gaia/LoTSS catalog ------------------------------------
 env1 = "C:/Users/ADMIN/Downloads/gaia_info_100pc_lc_info_lotss.csv"
 tab = Table.read(env1)
@@ -56,7 +57,7 @@ with fits.open(fn_fits) as hdul:  # context manager closes the file handle prope
 class DynamicSpectrum:
     """
     Wraps a LOFAR-style dynamic-spectrum FITS cube of shape
-    (n_stokes, n_freq, n_time) plus its header metadata, and gives you
+    (n_stokes, n_freq, n_time) plus its header metadata and gives you
     plotting + simple statistics helpers.
     """
 
@@ -123,7 +124,7 @@ class DynamicSpectrum:
         elif freq_idx is not None and time_idx is None:
             sub = data[freq_idx, :]
         else:
-            sub = data[freq_idx, time_idx]
+            sub = data[freq_idx, time_idx] 
 
         std = np.nanstd(sub)
         maxv = np.nanmax(sub)
@@ -336,4 +337,3 @@ fig.colorbar(im, ax=ax, label="Stokes I (dedispersed)")
 ax.set_xlabel("Time (MJD)")
 ax.set_ylabel("Frequency (MHz)")
 plt.show()
-

@@ -1,7 +1,7 @@
 """
 flare_pipeline.py
 
-Measures stellar activity from TESS light curves using Ivey's flare-finding
+eThis code measures stellar activity from TESS light curves using Ivey's flare-finding
 algorithm (Star / Flares classes). For each star in the catalog, this:
 
     1. looks up the star's info (Teff, radius, etc.) from the catalog,
