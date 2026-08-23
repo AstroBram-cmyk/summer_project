@@ -1,20 +1,4 @@
-"""
-LoTSS / LOFAR Stokes-I light-curve and trial-DM analysis.
 
-This script:
-1. Loads a LoTSS/LOFAR dynamic-spectrum FITS cube.
-2. Extracts Stokes I.
-3. Performs frequency-channel quality control.
-4. Builds a frequency-averaged light curve.
-5. Measures baseline, peak, noise, excess signal and S/N.
-6. Produces diagnostic plots.
-7. Searches a grid of trial dispersion measures (DMs).
-8. Produces the best trial-DM dedispersed dynamic spectrum.
-9. Optionally looks up a TIC ID in a Gaia/LoTSS catalogue and retrieves TESS SPOC light curves.
-
-Expected FITS data shape:
-    (n_stokes, n_frequency, n_time)
-"""
 
 from pathlib import Path
 from warnings import warn
