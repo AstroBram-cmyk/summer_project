@@ -248,30 +248,3 @@ def load_burst_catalog(in_path):
     """Reloads a previously saved burst catalog from JSON."""
     with open(in_path) as f:
         return json.load(f)
-
-
-# ===========================================================================
-# Example usage
-# ===========================================================================
-if __name__ == "__main__":
-    # This assumes DynamicSpectrum and fn_fits already exist in my
-    # session (e.g. run tess_lotss-project.py first or paste the
-    # DynamicSpectrum class + fn_fits path above this block).
-    #
-    # ds = DynamicSpectrum(fn_fits)
-    # bursts = detect_bursts(ds, sigma_threshold=5.0)
-    # print(f"Found {len(bursts)} candidate bursts")
-    # for b in bursts:
-    #     print(b["burst_id"], b["type"], b["drift_rate_MHz_per_s"], b["duration_s"])
-    #
-    # save_burst_catalog(bursts, "burst_catalog.json")
-    #
-    # if bursts:
-    #     recovered = recover_burst(ds, bursts[0])
-    #     if recovered is not None:
-    #         import matplotlib.pyplot as plt
-    #         plt.plot(recovered["time_axis_mjd"], recovered["time_profile"])
-    #         plt.xlabel("Time (MJD)")
-    #         plt.ylabel("Dedispersed flux")
-    #         plt.show()
-    pass
